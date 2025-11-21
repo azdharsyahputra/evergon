@@ -1,0 +1,51 @@
+# ============================================
+# IGNORE NGINX SOURCE CODE FROM GITHUB LINGUIST
+# ============================================
+
+nginx/nginx-1.26.2/** linguist-vendored
+nginx/nginx-1.26.2/** linguist-generated
+nginx/nginx-1.26.2/** linguist-documentation=false
+
+# Kalau nanti update versi Nginx → tinggal ganti folder
+nginx/** linguist-vendored
+nginx/** linguist-generated
+
+
+# ============================================
+# IGNORE PHP DISTRIBUTION (BINARY / VENDOR)
+# ============================================
+php_versions/** linguist-vendored
+php_versions/** linguist-generated
+
+
+# ============================================
+# TREAT CONFIGS AS NON-SOURCE
+# ============================================
+*.ini linguist-vendored
+*.conf linguist-vendored
+*.cfg linguist-vendored
+*.env linguist-vendored
+
+
+# ============================================
+# FRONTEND BUILD ARTIFACTS IGNORE
+# ============================================
+panel/dist/** linguist-vendored
+panel/build/** linguist-vendored
+
+
+# ============================================
+# TREAT SOME FILE TYPES AS “REAL CODE”
+# ============================================
+*.go linguist-language=Go
+*.ts linguist-language=TypeScript
+*.tsx linguist-language=TypeScript
+*.js linguist-language=JavaScript
+*.jsx linguist-language=JavaScript
+*.php linguist-language=PHP
+
+
+# ============================================
+# OPTIONAL — Kalau nanti pakai Rust
+# ============================================
+*.rs linguist-language=Rust
