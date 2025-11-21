@@ -1,4 +1,5 @@
-import { ServerCog, Folder, Activity, Play, Square, RefreshCcw } from "lucide-react";
+import { Play, Square, RefreshCcw, Folder, Plus } from "lucide-react";
+import PhpLogo from "../assets/services/php-fpm.svg";
 
 interface PhpVersion {
   version: string;
@@ -16,44 +17,58 @@ export default function PhpVersions() {
   return (
     <div className="space-y-10">
 
-      {/* Title */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-          PHP Versions
-        </h1>
-        <p className="text-gray-500 mt-1">
-          Manage installed PHP versions for Evergon Engine.
-        </p>
-      </div>
+    {/* Page Header */}
+    <section className="bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-2xl p-8 text-white shadow-lg">
+      <h1 className="text-4xl font-extrabold tracking-tight">
+        PHP Versions
+      </h1>
+      <p className="text-indigo-100 text-lg mt-2">
+        Manage installed PHP versions for Evergon Engine.
+      </p>
+    </section>
 
       {/* PHP List */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
         {mockPhp.map((php, idx) => (
           <PhpVersionCard key={idx} php={php} />
         ))}
+
+        {/* ADD NEW VERSION CARD */}
+        <AddPhpCard />
       </div>
     </div>
   );
 }
 
-// ========================
-// COMPONENT: Version Card
-// ========================
+// =============================
+// CARD: PHP Version
+// =============================
+
 function PhpVersionCard({ php }: { php: PhpVersion }) {
   const isRunning = php.status === "running";
 
   return (
-    <div className="bg-white border rounded-2xl p-6 shadow-sm hover:shadow-md transition group">
+    <div className="bg-white/90 backdrop-blur-xl border rounded-2xl shadow-sm hover:shadow-xl transition p-6 relative overflow-hidden">
+
+      {/* Gradient Bar */}
+      <div
+        className={`absolute top-0 left-0 w-1 h-full ${
+          isRunning
+            ? "bg-gradient-to-b from-green-400 to-green-600"
+            : "bg-gradient-to-b from-red-400 to-red-600"
+        }`}
+      />
 
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-indigo-50 group-hover:bg-indigo-100 transition">
-            <ServerCog className="text-indigo-600" size={24} />
+      <div className="flex items-start justify-between">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-xl bg-gray-50 overflow-hidden shadow flex items-center justify-center">
+            <img src={PhpLogo} alt="php" className="w-full h-full object-contain" />
           </div>
+
           <div>
-            <h3 className="font-semibold text-gray-900 text-lg">{php.version}</h3>
-            <div className="flex items-center gap-2 text-gray-500 text-sm mt-0.5">
+            <h3 className="font-bold text-xl text-gray-900">{php.version}</h3>
+            <div className="flex items-center gap-2 text-gray-500 text-sm mt-1">
               <Folder size={15} />
               {php.path}
             </div>
@@ -62,17 +77,18 @@ function PhpVersionCard({ php }: { php: PhpVersion }) {
 
         <span
           className={`px-3 py-1 rounded-full text-sm font-semibold ${
-            isRunning
-              ? "bg-green-100 text-green-700"
-              : "bg-red-100 text-red-700"
+            isRunning ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
           }`}
         >
           {isRunning ? "Running" : "Stopped"}
         </span>
       </div>
 
-      {/* Actions */}
-      <div className="flex items-center gap-3 mt-6">
+      {/* Divider */}
+      <div className="border-t my-5" />
+
+      {/* Buttons */}
+      <div className="flex items-center gap-3">
         {isRunning ? (
           <button className="px-4 py-2 bg-red-600 text-white rounded-lg flex items-center gap-2 hover:bg-red-700 transition">
             <Square size={18} />
@@ -85,12 +101,36 @@ function PhpVersionCard({ php }: { php: PhpVersion }) {
           </button>
         )}
 
-        <button className="px-4 py-2 bg-gray-200 rounded-lg text-gray-700 flex items-center gap-2 hover:bg-gray-300 transition">
+        <button className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg flex items-center gap-2 hover:bg-gray-300 transition">
           <RefreshCcw size={18} />
           Restart
         </button>
       </div>
 
     </div>
+  );
+}
+
+// =============================
+// CARD: Add New PHP Version
+// =============================
+
+function AddPhpCard() {
+  return (
+    <button className="group bg-white/70 backdrop-blur-xl border-2 border-dashed border-gray-300 rounded-2xl p-6 shadow-sm hover:shadow-lg hover:border-indigo-400 transition flex flex-col items-center justify-center text-center gap-4">
+      
+      <div className="w-16 h-16 rounded-xl bg-gray-100 group-hover:bg-indigo-50 flex items-center justify-center transition">
+        <Plus size={32} className="text-gray-500 group-hover:text-indigo-600" />
+      </div>
+
+      <div>
+        <p className="font-semibold text-gray-800 group-hover:text-indigo-700">
+          Add New PHP Version
+        </p>
+        <p className="text-sm text-gray-500 mt-1">
+          Install and register another PHP runtime.
+        </p>
+      </div>
+    </button>
   );
 }

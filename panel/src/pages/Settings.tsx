@@ -1,18 +1,19 @@
-import { Cog, Globe, Monitor, Info, Wrench } from "lucide-react";
+import { Cog, Monitor, Info, Wrench } from "lucide-react";
+import type { ReactNode } from "react";
 
 export default function Settings() {
   return (
     <div className="space-y-10">
 
       {/* Title */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+      <section className="bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-2xl p-8 text-white shadow-lg mb-6">
+        <h1 className="text-4xl font-extrabold tracking-tight">
           Settings
         </h1>
-        <p className="text-gray-500 mt-1">
+        <p className="text-indigo-100 text-lg mt-2">
           Manage Evergon preferences, engine configuration, and UI options.
         </p>
-      </div>
+      </section>
 
       {/* Settings Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -77,10 +78,10 @@ function SettingCard({
   description,
   children,
 }: {
-  icon: JSX.Element;
+  icon: ReactNode;
   title: string;
   description: string;
-  children: JSX.Element | JSX.Element[];
+  children: ReactNode;
 }) {
   return (
     <div className="bg-white border rounded-2xl shadow-sm p-6 hover:shadow-md transition">
