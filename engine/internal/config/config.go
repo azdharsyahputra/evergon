@@ -41,7 +41,7 @@ func Load() Config {
 
 	return Config{
 		ServerAddr:      "127.0.0.1:9090",
-		Workspace:       "/home/azdhar/evergon/workspace",
+		Workspace:       "/home/azdhar/evergon",
 		PHPExecutable:   "/usr/sbin/php-fpm8.1", // not used in FPM mode but kept for future
 		PHPMode:         "fpm",
 		FPMSocket:       "/run/php/php8.1-fpm.sock",

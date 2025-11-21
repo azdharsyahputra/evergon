@@ -3,3 +3,4 @@
 127.0.0.1 - - [21/Nov/2025:08:16:43 +0700] "GET /favicon.ico HTTP/1.1" 404 548 "http://testapp.test/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"
 127.0.0.1 - - [21/Nov/2025:08:21:33 +0700] "GET / HTTP/1.1" 404 146 "-" "curl/7.81.0"
 127.0.0.1 - - [21/Nov/2025:08:40:56 +0700] "GET / HTTP/1.1" 404 146 "-" "curl/7.81.0"
+127.0.0.1 - - [21/Nov/2025:09:04:09 +0700] "GET / HTTP/1.1" 404 548 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"

@@ -22,3 +22,10 @@
 2025/11/21 08:39:26 [notice] 38169#0: signal process started
 2025/11/21 08:39:26 [error] 38169#0: open() "/home/azdhar/evergon/nginx/build/logs/nginx.pid" failed (2: No such file or directory)
 2025/11/21 08:43:32 [notice] 39640#0: signal process started
+2025/11/21 08:54:11 [notice] 45713#0: signal process started
+2025/11/21 08:56:40 [emerg] 46650#0: bind() to 0.0.0.0:80 failed (98: Address already in use)
+2025/11/21 08:56:40 [emerg] 46650#0: bind() to 0.0.0.0:80 failed (98: Address already in use)
+2025/11/21 08:56:40 [emerg] 46650#0: bind() to 0.0.0.0:80 failed (98: Address already in use)
+2025/11/21 08:56:40 [emerg] 46650#0: bind() to 0.0.0.0:80 failed (98: Address already in use)
+2025/11/21 08:56:40 [emerg] 46650#0: bind() to 0.0.0.0:80 failed (98: Address already in use)
+2025/11/21 08:56:40 [emerg] 46650#0: still could not bind()
