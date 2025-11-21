@@ -29,3 +29,4 @@
 2025/11/21 08:56:40 [emerg] 46650#0: bind() to 0.0.0.0:80 failed (98: Address already in use)
 2025/11/21 08:56:40 [emerg] 46650#0: bind() to 0.0.0.0:80 failed (98: Address already in use)
 2025/11/21 08:56:40 [emerg] 46650#0: still could not bind()
+2025/11/21 09:22:21 [notice] 59091#0: signal process started

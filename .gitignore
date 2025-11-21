@@ -1,0 +1,105 @@
+# ----------------------------------------
+# Global ignores
+# ----------------------------------------
+*.log
+*.pid
+*.tmp
+*.temp
+*.cache
+.DS_Store
+Thumbs.db
+
+# ----------------------------------------
+# Go Build Artifacts
+# ----------------------------------------
+/engine/cmd/evergon-engine/evergon-engine
+/engine/cmd/evergon-engine/evergon-engine.exe
+
+# Go cache & vendor (if ever used)
+bin/
+vendor/
+*.exe
+
+# ----------------------------------------
+# Nginx Build (compiled version)
+# ----------------------------------------
+/nginx/nginx-1.26.2/objs/
+/nginx/nginx-1.26.2/Makefile
+/nginx/nginx-1.26.2/nginx
+/nginx/nginx-1.26.2/.configure
+
+# ----------------------------------------
+# Nginx Build Output Directory
+# (Keep folder structure but ignore contents)
+# ----------------------------------------
+/nginx/build/*
+
+# But keep the folder itself
+!/nginx/build/
+!/nginx/build/logs/
+!/nginx/build/client_body_temp/
+!/nginx/build/proxy_temp/
+!/nginx/build/fastcgi_temp/
+!/nginx/build/scgi_temp/
+!/nginx/build/uwsgi_temp/
+
+# Ignore everything inside them
+/nginx/build/logs/*
+/nginx/build/client_body_temp/*
+/nginx/build/proxy_temp/*
+/nginx/build/fastcgi_temp/*
+/nginx/build/scgi_temp/*
+/nginx/build/uwsgi_temp/*
+
+# ----------------------------------------
+# Portable Nginx runtime logs
+# ----------------------------------------
+/nginx/portable/logs/*
+
+# ----------------------------------------
+# PHP Versions compiled or extracted
+# (We don’t want huge PHP distributions in git)
+# ----------------------------------------
+/php_versions/php-*/*
+/php_versions/php-*/*.exe
+/php_versions/php-*/*.dll
+
+# But keep folder root
+!/php_versions/
+
+# ----------------------------------------
+# Installer builds
+# ----------------------------------------
+/installer/*.exe
+/installer/*.msi
+/installer/build/*
+/installer/dist/*
+
+# ----------------------------------------
+# Panel Production Builds
+# ----------------------------------------
+/panel/node_modules/
+/panel/.next/
+/panel/.nuxt/
+/panel/dist/
+/panel/build/
+
+# ----------------------------------------
+# Public runtime files
+# ----------------------------------------
+/public/uploads/*
+/www/*/logs/*
+
+# ----------------------------------------
+# IDE / Editor-specific
+# ----------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ----------------------------------------
+# OS Files
+# ----------------------------------------
+ehthumbs.db
+Icon?
