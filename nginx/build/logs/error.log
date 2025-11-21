@@ -1,0 +1,24 @@
+2025/11/21 07:57:06 [warn] 17895#0: the "user" directive makes sense only if the master process runs with super-user privileges, ignored in /home/azdhar/evergon/nginx/portable/conf/nginx.conf:1
+2025/11/21 07:59:34 [emerg] 19130#0: open() "/home/azdhar/evergon/nginx/build/conf/nginx.conf" failed (2: No such file or directory)
+2025/11/21 07:59:40 [emerg] 19153#0: open() "/home/azdhar/evergon/nginx/build/conf/nginx.conf" failed (2: No such file or directory)
+2025/11/21 08:00:24 [alert] 18194#0: unlink() "/home/azdhar/evergon/nginx/build/logs/nginx.pid" failed (2: No such file or directory)
+2025/11/21 08:00:24 [alert] 19366#0: unlink() "/home/azdhar/evergon/nginx/build/logs/nginx.pid" failed (2: No such file or directory)
+2025/11/21 08:03:35 [emerg] 20717#0: "server" directive is not allowed here in /home/azdhar/evergon/nginx/portable/conf/nginx.conf:25
+2025/11/21 08:04:55 [emerg] 21318#0: "server" directive is not allowed here in /home/azdhar/evergon/nginx/portable/conf/nginx.conf:25
+2025/11/21 08:05:30 [emerg] 21420#0: bind() to 0.0.0.0:80 failed (13: Permission denied)
+2025/11/21 08:14:35 [emerg] 27709#0: open() "/home/azdhar/evergon/nginx/build/conf/nginx.conf" failed (2: No such file or directory)
+2025/11/21 08:15:33 [emerg] 28085#0: bind() to 0.0.0.0:80 failed (98: Address already in use)
+2025/11/21 08:15:33 [emerg] 28085#0: bind() to 0.0.0.0:80 failed (98: Address already in use)
+2025/11/21 08:15:33 [emerg] 28085#0: bind() to 0.0.0.0:80 failed (98: Address already in use)
+2025/11/21 08:15:33 [emerg] 28085#0: bind() to 0.0.0.0:80 failed (98: Address already in use)
+2025/11/21 08:15:33 [emerg] 28085#0: bind() to 0.0.0.0:80 failed (98: Address already in use)
+2025/11/21 08:15:33 [emerg] 28085#0: still could not bind()
+2025/11/21 08:21:06 [emerg] 31270#0: open() "/home/azdhar/evergon/nginx/build/conf/nginx.conf" failed (2: No such file or directory)
+2025/11/21 08:24:34 [notice] 32597#0: signal process started
+2025/11/21 08:33:12 [notice] 35776#0: signal process started
+2025/11/21 08:38:07 [emerg] 37620#0: open() "/home/azdhar/evergon/nginx/build/conf/nginx.conf" failed (2: No such file or directory)
+2025/11/21 08:38:19 [emerg] 37692#0: open() "/home/azdhar/evergon/nginx/build/conf/nginx.conf" failed (2: No such file or directory)
+2025/11/21 08:38:57 [notice] 37949#0: signal process started
+2025/11/21 08:39:26 [notice] 38169#0: signal process started
+2025/11/21 08:39:26 [error] 38169#0: open() "/home/azdhar/evergon/nginx/build/logs/nginx.pid" failed (2: No such file or directory)
+2025/11/21 08:43:32 [notice] 39640#0: signal process started

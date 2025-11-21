@@ -3,6 +3,8 @@ package scanner
 import (
 	"os"
 	"path/filepath"
+
+	"evergon/engine/internal/config"
 )
 
 type Project struct {
@@ -11,32 +13,45 @@ type Project struct {
 	Type string `json:"type"`
 }
 
+// Detect project type
+func detectType(path string) string {
+	if fileExists(filepath.Join(path, "artisan")) {
+		return "laravel"
+	}
+	if fileExists(filepath.Join(path, "system")) {
+		return "ci4"
+	}
+	if fileExists(filepath.Join(path, "wp-config.php")) {
+		return "wordpress"
+	}
+	return "unknown"
+}
+
 func Scan() []Project {
-	root := "C:/Dev" // nanti ambil dari config
+	cfg := config.Load()
+	root := filepath.Join(cfg.Workspace, "www")
+
 	result := []Project{}
 
-	filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
-		if err != nil || !info.IsDir() {
-			return nil
+	entries, err := os.ReadDir(root)
+	if err != nil {
+		return result
+	}
+
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			continue
 		}
 
-		// Laravel
-		if fileExists(filepath.Join(path, "artisan")) {
-			result = append(result, Project{filepath.Base(path), path, "laravel"})
-		}
+		projectPath := filepath.Join(root, entry.Name())
+		projectType := detectType(projectPath)
 
-		// CI4
-		if fileExists(filepath.Join(path, "system")) {
-			result = append(result, Project{filepath.Base(path), path, "ci4"})
-		}
-
-		// WordPress
-		if fileExists(filepath.Join(path, "wp-config.php")) {
-			result = append(result, Project{filepath.Base(path), path, "wordpress"})
-		}
-
-		return nil
-	})
+		result = append(result, Project{
+			Name: entry.Name(),
+			Path: projectPath,
+			Type: projectType,
+		})
+	}
 
 	return result
 }
