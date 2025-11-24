@@ -7,13 +7,82 @@ import {
   Gauge,
   BarChart3,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
+/* =====================================================
+   API UTILS
+===================================================== */
+
+// POST untuk action (start/stop)
+async function callAPI(path: string) {
+  const res = await fetch(`http://127.0.0.1:9090${path}`, { method: "POST" });
+  if (!res.ok) throw new Error(await res.text());
+  return res.text();
+}
+
+// GET untuk status
+async function getStatus(path: string) {
+  const res = await fetch(`http://127.0.0.1:9090${path}`);
+  if (!res.ok) throw new Error(await res.text());
+  return res.text();
+}
+
+// NGINX
+const startNginx = () => callAPI("/nginx/start");
+const stopNginx = () => callAPI("/nginx/stop");
+const reloadNginx = () => callAPI("/nginx/reload");
+
+// PHP
+const startPHP = (root: string) =>
+  callAPI(`/php/start?root=${encodeURIComponent(root)}`);
+const stopPHP = () => callAPI("/php/stop");
+
+// STATUS
+const fetchPhpStatus = () => getStatus("/php/status");
+const fetchNginxStatus = () => getStatus("/nginx/status");
+
+/* =====================================================
+   DASHBOARD PAGE
+===================================================== */
+
 export default function Dashboard() {
+  const [phpStatus, setPhpStatus] = useState<"running" | "stopped">("stopped");
+  const [nginxStatus, setNginxStatus] = useState<"running" | "stopped">(
+    "stopped"
+  );
+
+  const [loadingPHP, setLoadingPHP] = useState(false);
+  const [loadingNginx, setLoadingNginx] = useState(false);
+
+  /* ----------------------------------
+      AUTO LOAD + AUTO REFRESH STATUS
+  ----------------------------------- */
+  useEffect(() => {
+    async function loadStatus() {
+      try {
+        const php = await fetchPhpStatus();
+        const ngx = await fetchNginxStatus();
+
+        setPhpStatus(php.includes("running") ? "running" : "stopped");
+        setNginxStatus(ngx.includes("running") ? "running" : "stopped");
+      } catch (err) {
+        console.error("status error:", err);
+      }
+    }
+
+    // Load awal
+    loadStatus();
+
+    // Auto refresh setiap 3 detik
+    const timer = setInterval(loadStatus, 3000);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <div className="space-y-12">
 
-      {/* HERO SECTION */}
+      {/* HERO */}
       <section className="bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-2xl p-8 text-white shadow-lg">
         <h1 className="text-4xl font-extrabold tracking-tight">
           Welcome to Evergon
@@ -40,7 +109,7 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* TOP STATS */}
+      {/* SERVICE CARDS */}
       <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
 
         <StatCard
@@ -50,27 +119,123 @@ export default function Dashboard() {
           status="running"
         />
 
+        {/* PHP STATUS */}
         <StatCard
-          title="PHP Versions"
-          value="3 Installed"
+          title="PHP-FPM"
+          value={phpStatus === "running" ? "Running" : "Stopped"}
           icon={<Code2 size={26} />}
+          status={phpStatus}
+          actions={
+            <div className="flex gap-2">
+              {phpStatus === "running" ? (
+                <button
+                  onClick={async () => {
+                    setLoadingPHP(true);
+                    try {
+                      await stopPHP();
+                      setPhpStatus("stopped");
+                    } finally {
+                      setLoadingPHP(false);
+                    }
+                  }}
+                  disabled={loadingPHP}
+                  className="px-3 py-1 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 disabled:opacity-50"
+                >
+                  {loadingPHP ? "..." : "Stop"}
+                </button>
+              ) : (
+                <button
+                  onClick={async () => {
+                    setLoadingPHP(true);
+                    try {
+                      await startPHP("/home/azdhar/evergon/www");
+                      setPhpStatus("running");
+                    } finally {
+                      setLoadingPHP(false);
+                    }
+                  }}
+                  disabled={loadingPHP}
+                  className="px-3 py-1 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 disabled:opacity-50"
+                >
+                  {loadingPHP ? "..." : "Start"}
+                </button>
+              )}
+            </div>
+          }
         />
 
+        {/* PROJECTS */}
         <StatCard
           title="Active Projects"
           value="7 Projects"
           icon={<FolderDot size={26} />}
         />
 
+        {/* NGINX STATUS */}
         <StatCard
-          title="Nginx Status"
-          value="Running"
+          title="Nginx"
+          value={nginxStatus === "running" ? "Running" : "Stopped"}
           icon={<Server size={26} />}
-          status="running"
+          status={nginxStatus}
+          actions={
+            <div className="flex gap-2">
+              {nginxStatus === "running" ? (
+                <>
+                  <button
+                    onClick={async () => {
+                      setLoadingNginx(true);
+                      try {
+                        await stopNginx();
+                        setNginxStatus("stopped");
+                      } finally {
+                        setLoadingNginx(false);
+                      }
+                    }}
+                    disabled={loadingNginx}
+                    className="px-3 py-1 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 disabled:opacity-50"
+                  >
+                    {loadingNginx ? "..." : "Stop"}
+                  </button>
+
+                  <button
+                    onClick={async () => {
+                      setLoadingNginx(true);
+                      try {
+                        await reloadNginx();
+                      } finally {
+                        setLoadingNginx(false);
+                      }
+                    }}
+                    disabled={loadingNginx}
+                    className="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded-lg hover:bg-gray-300 disabled:opacity-50"
+                  >
+                    {loadingNginx ? "..." : "Reload"}
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={async () => {
+                    setLoadingNginx(true);
+                    try {
+                      await startNginx();
+                      setNginxStatus("running");
+                    } finally {
+                      setLoadingNginx(false);
+                    }
+                  }}
+                  disabled={loadingNginx}
+                  className="px-3 py-1 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 disabled:opacity-50"
+                >
+                  {loadingNginx ? "..." : "Start"}
+                </button>
+              )}
+            </div>
+          }
         />
+
       </section>
 
-      {/* ANALYTICS SECTION */}
+      {/* ANALYTICS */}
       <section className="space-y-6">
         <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
           <BarChart3 size={20} className="text-indigo-500" />
@@ -78,13 +243,11 @@ export default function Dashboard() {
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
           <AnalyticsCard
             title="CPU Usage (Last 30s)"
             metric="12%"
             color="bg-indigo-500"
           />
-
           <AnalyticsCard
             title="Memory Usage"
             metric="32%"
@@ -93,20 +256,16 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* COMING SOON */}
+      {/* Coming Soon */}
       <section className="space-y-4">
-        <h2 className="text-xl font-semibold text-gray-900">
-          Coming Soon
-        </h2>
+        <h2 className="text-xl font-semibold text-gray-900">Coming Soon</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
           <ComingCard
             icon={<Activity size={20} />}
             title="Service Controls"
             subtitle="Start/Stop PHP-FPM, MySQL, PostgreSQL & Nginx."
           />
-
           <ComingCard
             icon={<FolderDot size={20} />}
             title="Project Scanner"
@@ -114,30 +273,32 @@ export default function Dashboard() {
           />
         </div>
       </section>
+
     </div>
   );
 }
 
-/* ============================
+/* =====================================================
    COMPONENTS
-============================ */
+===================================================== */
 
 function StatCard({
   title,
   value,
   icon,
   status,
+  actions,
 }: {
   title: string;
   value: string;
   icon: ReactNode;
   status?: "running" | "stopped";
+  actions?: ReactNode;
 }) {
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition group border">
+    <div className="bg-white rounded-2xl p-6 border shadow-sm hover:shadow-md transition group">
       <div className="flex items-center justify-between">
         <p className="text-gray-500 text-sm font-medium">{title}</p>
-
         <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600 group-hover:bg-indigo-100 transition">
           {icon}
         </div>
@@ -158,6 +319,8 @@ function StatCard({
       ) : (
         <h2 className="mt-3 text-2xl font-bold text-gray-900">{value}</h2>
       )}
+
+      {actions && <div className="mt-4">{actions}</div>}
     </div>
   );
 }
@@ -172,14 +335,11 @@ function AnalyticsCard({
   color: string;
 }) {
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition border">
+    <div className="bg-white rounded-2xl p-6 border shadow-sm hover:shadow-md transition">
       <p className="text-gray-500 text-sm font-medium">{title}</p>
-
       <h2 className="text-3xl font-bold text-gray-900 mt-2">{metric}</h2>
-
-      {/* pseudo sparkline */}
       <div className="mt-4">
-        <div className={`h-2 rounded-full ${color} opacity-80 w-full`}></div>
+        <div className={`h-2 w-full rounded-full ${color} opacity-80`} />
       </div>
     </div>
   );
