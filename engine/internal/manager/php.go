@@ -1,27 +1,34 @@
 package manager
 
 import (
+	"evergon/engine/internal/config"
 	"fmt"
 	"os/exec"
-
-	"evergon/engine/internal/config"
 )
+
+var phpCmd *exec.Cmd
 
 func StartPHP(root string) error {
 	cfg := config.Load()
 
-	// Linux → using FPM → nothing to start
-	if cfg.PHPMode == "fpm" {
+	if cfg.PHPMode != "builtin" {
+		// FPM mode (Linux default service)
 		return nil
 	}
 
-	// Windows → built-in server
-	cmd := exec.Command(cfg.PHPExecutable, "-S", "127.0.0.1:9000", "-t", root)
-	cmd.Stdout = nil
-	cmd.Stderr = nil
+	// Kalau sudah running, jangan start dua kali
+	if phpCmd != nil {
+		return fmt.Errorf("PHP already running")
+	}
 
-	if err := cmd.Start(); err != nil {
-		return fmt.Errorf("failed to start PHP built-in server: %v", err)
+	// Start PHP built-in server
+	phpCmd = exec.Command(cfg.PHPExecutable, "-S", "127.0.0.1:9000", "-t", root)
+	phpCmd.Stdout = nil
+	phpCmd.Stderr = nil
+
+	if err := phpCmd.Start(); err != nil {
+		phpCmd = nil
+		return fmt.Errorf("PHP built-in start failed: %v", err)
 	}
 
 	return nil
@@ -30,11 +37,18 @@ func StartPHP(root string) error {
 func StopPHP() error {
 	cfg := config.Load()
 
-	// Linux → nothing to stop
-	if cfg.PHPMode == "fpm" {
+	if cfg.PHPMode != "builtin" {
+		// FPM mode: nothing to stop
 		return nil
 	}
 
-	// Windows → kill php-cgi / php.exe
-	return exec.Command("taskkill", "/IM", "php-cgi.exe", "/F").Run()
+	// Built-in process kill
+	if phpCmd != nil {
+		err := phpCmd.Process.Kill()
+		phpCmd = nil
+		return err
+	}
+
+	// fallback kill
+	return exec.Command("pkill", "-f", "php -S").Run()
 }

@@ -36,18 +36,19 @@ func Load() Config {
 		}
 	}
 
-	// --- LINUX MODE (PHP-FPM) ---
-	log.Println("[CONFIG] Linux mode (PHP-FPM)")
+	// --- LINUX MODE (PHP Built-in Server) ---
+	log.Println("[CONFIG] Linux mode (PHP Built-in Server)")
 
 	return Config{
 		ServerAddr:      "127.0.0.1:9090",
 		Workspace:       "/home/azdhar/evergon",
-		PHPExecutable:   "/usr/sbin/php-fpm8.1", // not used in FPM mode but kept for future
-		PHPMode:         "fpm",
-		FPMSocket:       "/run/php/php8.1-fpm.sock",
+		PHPExecutable:   "/usr/bin/php", // built-in PHP CLI
+		PHPMode:         "builtin",      // PENTING
+		FPMSocket:       "",
 		NginxExecutable: "/home/azdhar/evergon/nginx/portable/sbin/nginx",
 		NginxConf:       "/home/azdhar/evergon/nginx/portable/conf/nginx.conf",
 		TemplateDir:     "/home/azdhar/evergon/nginx_template",
 		NginxVHostDir:   "/home/azdhar/evergon/nginx/portable/conf/vhosts",
 	}
+
 }
