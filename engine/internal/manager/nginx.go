@@ -10,9 +10,9 @@ import (
 	"evergon/engine/internal/process"
 )
 
-// ===========================
-// NGINX PROCESS CONTROL
-// ===========================
+// ===================================
+// NGINX CONTROL
+// ===================================
 
 func StartNginx() error {
 	cfg := config.Load()
@@ -20,9 +20,8 @@ func StartNginx() error {
 }
 
 func StopNginx() error {
-	// Linux: killall nginx
-	// Windows: taskkill nginx.exe
-	return process.Stop("nginx")
+	// stop portable nginx
+	return process.Stop("portable/sbin/nginx")
 }
 
 func ReloadNginx() error {
@@ -30,14 +29,13 @@ func ReloadNginx() error {
 	return process.Run(cfg.NginxExecutable, "-s", "reload", "-c", cfg.NginxConf)
 }
 
-// ===========================
-// VHOST GENERATOR (HYBRID)
-// ===========================
+// ===================================
+// VHOST GENERATOR
+// ===================================
 
 func CreateVHost(domain, root, phpPort string) error {
 	cfg := config.Load()
 
-	// 1. Load template
 	tmplPath := filepath.Join(cfg.TemplateDir, "vhost.conf")
 	raw, err := os.ReadFile(tmplPath)
 	if err != nil {
@@ -46,11 +44,9 @@ func CreateVHost(domain, root, phpPort string) error {
 
 	content := string(raw)
 
-	// 2. Generate PHP BLOCK based on OS mode
 	var phpBlock string
 
 	if cfg.PHPMode == "fpm" {
-		// Linux PHP-FPM
 		phpBlock = `
     location ~ \.php$ {
         include fastcgi_params;
@@ -59,7 +55,6 @@ func CreateVHost(domain, root, phpPort string) error {
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
     }`
 	} else {
-		// Windows Built-in PHP Server
 		phpBlock = `
     location ~ \.php$ {
         include fastcgi_params;
@@ -69,24 +64,19 @@ func CreateVHost(domain, root, phpPort string) error {
     }`
 	}
 
-	// 3. Replace variables
 	content = strings.ReplaceAll(content, "{{SERVER_NAME}}", domain)
 	content = strings.ReplaceAll(content, "{{ROOT_PATH}}", root)
 	content = strings.ReplaceAll(content, "{{PHP_BLOCK}}", phpBlock)
 
-	// 4. Ensure vhost dir exists
 	if _, err := os.Stat(cfg.NginxVHostDir); os.IsNotExist(err) {
 		os.MkdirAll(cfg.NginxVHostDir, 0755)
 	}
 
-	// 5. Write vhost file
 	output := filepath.Join(cfg.NginxVHostDir, domain+".conf")
 
-	err = os.WriteFile(output, []byte(content), 0644)
-	if err != nil {
+	if err := os.WriteFile(output, []byte(content), 0644); err != nil {
 		return fmt.Errorf("failed to write vhost file: %v", err)
 	}
 
-	// 6. Reload nginx
 	return ReloadNginx()
 }

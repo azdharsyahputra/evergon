@@ -6,6 +6,7 @@ import (
 	"runtime"
 )
 
+// Start a process without waiting
 func Start(path string, args ...string) error {
 	cmd := exec.Command(path, args...)
 	cmd.Stdout = os.Stdout
@@ -13,6 +14,7 @@ func Start(path string, args ...string) error {
 	return cmd.Start()
 }
 
+// Run and wait until completed
 func Run(path string, args ...string) error {
 	cmd := exec.Command(path, args...)
 	cmd.Stdout = os.Stdout
@@ -20,13 +22,17 @@ func Run(path string, args ...string) error {
 	return cmd.Run()
 }
 
-// Stop process by executable name
+// Kill by process name (exe)
 func Stop(exe string) error {
-	// Windows
 	if runtime.GOOS == "windows" {
 		return exec.Command("taskkill", "/IM", exe, "/F").Run()
 	}
-
-	// Linux / MacOS
 	return exec.Command("pkill", "-f", exe).Run()
+}
+
+// Check if process is running
+func IsRunning(name string) bool {
+	cmd := exec.Command("pgrep", "-f", name)
+	err := cmd.Run()
+	return err == nil // exit code 0 = FOUND
 }
