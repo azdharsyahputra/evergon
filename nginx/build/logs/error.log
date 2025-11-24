@@ -30,3 +30,60 @@
 2025/11/21 08:56:40 [emerg] 46650#0: bind() to 0.0.0.0:80 failed (98: Address already in use)
 2025/11/21 08:56:40 [emerg] 46650#0: still could not bind()
 2025/11/21 09:22:21 [notice] 59091#0: signal process started
+2025/11/21 15:58:03 [notice] 83834#0: signal process started
+2025/11/21 15:58:03 [error] 83834#0: open() "/home/azdhar/evergon/nginx/build/logs/nginx.pid" failed (2: No such file or directory)
+2025/11/21 15:58:05 [emerg] 83846#0: bind() to 0.0.0.0:80 failed (13: Permission denied)
+2025/11/21 16:00:53 [emerg] 85218#0: bind() to 0.0.0.0:80 failed (13: Permission denied)
+2025/11/21 16:01:07 [emerg] 85351#0: bind() to 0.0.0.0:80 failed (13: Permission denied)
+2025/11/21 16:08:41 [notice] 89003#0: signal process started
+2025/11/21 16:08:41 [error] 89003#0: open() "/home/azdhar/evergon/nginx/build/logs/nginx.pid" failed (2: No such file or directory)
+2025/11/21 16:08:41 [emerg] 89004#0: bind() to 0.0.0.0:80 failed (13: Permission denied)
+2025/11/21 16:09:22 [emerg] 89403#0: bind() to 0.0.0.0:80 failed (13: Permission denied)
+2025/11/21 16:11:46 [emerg] 90263#0: bind() to 0.0.0.0:80 failed (13: Permission denied)
+2025/11/21 16:11:48 [notice] 90299#0: signal process started
+2025/11/21 16:11:48 [error] 90299#0: open() "/home/azdhar/evergon/nginx/build/logs/nginx.pid" failed (2: No such file or directory)
+2025/11/21 16:15:17 [notice] 94436#0: signal process started
+2025/11/21 16:15:17 [error] 94436#0: open() "/home/azdhar/evergon/nginx/build/logs/nginx.pid" failed (2: No such file or directory)
+2025/11/21 16:18:38 [notice] 103056#0: signal process started
+2025/11/21 16:18:38 [error] 103056#0: open() "/home/azdhar/evergon/nginx/build/logs/nginx.pid" failed (2: No such file or directory)
+2025/11/21 16:18:55 [notice] 103160#0: signal process started
+2025/11/21 16:18:55 [error] 103160#0: open() "/home/azdhar/evergon/nginx/build/logs/nginx.pid" failed (2: No such file or directory)
+2025/11/21 16:19:04 [emerg] 103209#0: bind() to 0.0.0.0:80 failed (13: Permission denied)
+2025/11/21 16:22:24 [notice] 106450#0: signal process started
+2025/11/21 16:22:24 [error] 106450#0: open() "/home/azdhar/evergon/nginx/build/logs/nginx.pid" failed (2: No such file or directory)
+2025/11/21 16:22:25 [notice] 106456#0: signal process started
+2025/11/21 16:22:25 [error] 106456#0: open() "/home/azdhar/evergon/nginx/build/logs/nginx.pid" failed (2: No such file or directory)
+2025/11/21 16:27:24 [emerg] 108649#0: bind() to 0.0.0.0:80 failed (13: Permission denied)
+2025/11/21 16:29:03 [notice] 110179#0: signal process started
+2025/11/21 16:29:03 [alert] 110179#0: kill(91234, 1) failed (3: No such process)
+2025/11/21 16:29:04 [notice] 110180#0: signal process started
+2025/11/21 16:29:04 [alert] 110180#0: kill(91234, 1) failed (3: No such process)
+2025/11/21 16:29:04 [notice] 110181#0: signal process started
+2025/11/21 16:29:04 [alert] 110181#0: kill(91234, 1) failed (3: No such process)
+2025/11/21 16:29:04 [notice] 110182#0: signal process started
+2025/11/21 16:29:04 [alert] 110182#0: kill(91234, 1) failed (3: No such process)
+2025/11/21 16:29:08 [notice] 110223#0: signal process started
+2025/11/21 16:29:08 [alert] 110223#0: kill(91234, 1) failed (3: No such process)
+2025/11/21 16:29:26 [notice] 110463#0: signal process started
+2025/11/21 16:29:26 [alert] 110463#0: kill(110431, 1) failed (1: Operation not permitted)
+2025/11/24 13:04:48 [emerg] 11950#0: bind() to 0.0.0.0:80 failed (13: Permission denied)
+2025/11/24 13:06:27 [emerg] 12544#0: bind() to 0.0.0.0:80 failed (13: Permission denied)
+2025/11/24 13:06:36 [emerg] 12616#0: bind() to 0.0.0.0:80 failed (13: Permission denied)
+2025/11/24 13:06:41 [emerg] 12811#0: bind() to 0.0.0.0:80 failed (13: Permission denied)
+2025/11/24 13:06:57 [emerg] 12889#0: bind() to 0.0.0.0:80 failed (13: Permission denied)
+2025/11/24 13:07:07 [emerg] 13116#0: bind() to 0.0.0.0:80 failed (13: Permission denied)
+2025/11/24 13:07:35 [emerg] 13210#0: bind() to 0.0.0.0:80 failed (13: Permission denied)
+2025/11/24 13:17:31 [emerg] 16972#0: open() "/home/azdhar/evergon/nginx/build/../../build/logs/error.log" failed (2: No such file or directory)
+2025/11/24 13:19:39 [emerg] 17984#0: bind() to 0.0.0.0:80 failed (13: Permission denied)
+2025/11/24 13:43:23 [emerg] 27252#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2025/11/24 13:43:23 [emerg] 27252#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2025/11/24 13:43:23 [emerg] 27252#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2025/11/24 13:43:23 [emerg] 27252#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2025/11/24 13:43:23 [emerg] 27252#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2025/11/24 13:43:23 [emerg] 27252#0: still could not bind()
+2025/11/24 13:47:37 [emerg] 28697#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2025/11/24 13:47:37 [emerg] 28697#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2025/11/24 13:47:37 [emerg] 28697#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2025/11/24 13:47:37 [emerg] 28697#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2025/11/24 13:47:37 [emerg] 28697#0: bind() to 0.0.0.0:8080 failed (98: Address already in use)
+2025/11/24 13:47:37 [emerg] 28697#0: still could not bind()
