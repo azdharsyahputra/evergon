@@ -71,3 +71,9 @@ func (r *Resolver) LogDir() string {
 func (r *Resolver) PHPVersionDir() string {
 	return filepath.Join(r.cfg.RootDir, "php_versions")
 }
+func (r *Resolver) NginxExecutable() string {
+	return r.cfg.NginxExecutable
+}
+func (r *Resolver) ProjectRoot(projectName string) string {
+	return filepath.Join(r.cfg.Workspace, "www", projectName)
+}
