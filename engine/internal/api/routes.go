@@ -103,6 +103,7 @@ func RegisterRoutes(mux *http.ServeMux, res *resolver.Resolver) {
 		list := scanner.Scan(res)
 		json.NewEncoder(w).Encode(list)
 	}))
+
 	mux.HandleFunc("/vhost/create", withCORS(func(w http.ResponseWriter, r *http.Request) {
 		project := r.URL.Query().Get("project")
 		if project == "" {
@@ -110,21 +111,19 @@ func RegisterRoutes(mux *http.ServeMux, res *resolver.Resolver) {
 			return
 		}
 
+		// Ensure project exists
 		root := filepath.Join(res.WorkspaceWWW(), project)
 		if _, err := os.Stat(root); os.IsNotExist(err) {
 			http.Error(w, "project not found", 404)
 			return
 		}
 
-		domain := project + ".local"
-		phpPort := "9000"
-
-		if err := manager.CreateVHost(domain, root, phpPort, res); err != nil {
+		domain, err := manager.CreateVHost(project, res)
+		if err != nil {
 			http.Error(w, err.Error(), 500)
 			return
 		}
 
-		manager.ReloadVHost()
 		w.Write([]byte(domain))
 	}))
 
@@ -139,8 +138,77 @@ func RegisterRoutes(mux *http.ServeMux, res *resolver.Resolver) {
 			http.Error(w, "domain required", 400)
 			return
 		}
-		manager.RemoveVHost(domain, res)
+
+		err := manager.RemoveVHost(domain, res)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+
 		w.Write([]byte("removed"))
+	}))
+
+	mux.HandleFunc("/vhost/update", withCORS(func(w http.ResponseWriter, r *http.Request) {
+		project := r.URL.Query().Get("project")
+		if project == "" {
+			http.Error(w, "project required", 400)
+			return
+		}
+
+		err := manager.UpdateVHost(project, res)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+
+		w.Write([]byte("updated"))
+	}))
+
+	mux.HandleFunc("/php/versions", withCORS(func(w http.ResponseWriter, r *http.Request) {
+		versions := manager.DetectPHPVersions()
+		json.NewEncoder(w).Encode(versions)
+	}))
+
+	mux.HandleFunc("/php/project/get", withCORS(func(w http.ResponseWriter, r *http.Request) {
+		project := r.URL.Query().Get("project")
+		cfg, err := manager.LoadProjectConfig(project)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+		json.NewEncoder(w).Encode(cfg)
+	}))
+
+	mux.HandleFunc("/php/project/set", withCORS(func(w http.ResponseWriter, r *http.Request) {
+		project := r.URL.Query().Get("project")
+		version := r.URL.Query().Get("version")
+
+		cfg, _ := manager.LoadProjectConfig(project)
+		cfg.PHPVersion = version
+
+		manager.SaveProjectConfig(project, cfg)
+
+		w.Write([]byte("ok"))
+	}))
+
+	mux.HandleFunc("/php/project/start", withCORS(func(w http.ResponseWriter, r *http.Request) {
+		project := r.URL.Query().Get("project")
+		port, err := manager.StartProjectPHP(project)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+		w.Write([]byte(port))
+	}))
+
+	mux.HandleFunc("/php/project/stop", withCORS(func(w http.ResponseWriter, r *http.Request) {
+		project := r.URL.Query().Get("project")
+		err := manager.StopProjectPHP(project)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+		w.Write([]byte("stopped"))
 	}))
 
 }
