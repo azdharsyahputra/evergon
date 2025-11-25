@@ -1,28 +1,20 @@
 package manager
 
 import (
-	"evergon/engine/internal/config"
 	"fmt"
 	"os/exec"
+
+	"evergon/engine/internal/util/resolver"
 )
 
 var phpCmd *exec.Cmd
 
-func StartPHP(root string) error {
-	cfg := config.Load()
-
-	if cfg.PHPMode != "builtin" {
-		// FPM mode (Linux default service)
-		return nil
-	}
-
-	// Kalau sudah running, jangan start dua kali
+func StartPHP(root string, res *resolver.Resolver) error {
 	if phpCmd != nil {
 		return fmt.Errorf("PHP already running")
 	}
 
-	// Start PHP built-in server
-	phpCmd = exec.Command(cfg.PHPExecutable, "-S", "127.0.0.1:9000", "-t", root)
+	phpCmd = exec.Command(res.PHPBinary(), "-S", "127.0.0.1:9000", "-t", root)
 	phpCmd.Stdout = nil
 	phpCmd.Stderr = nil
 
@@ -34,21 +26,12 @@ func StartPHP(root string) error {
 	return nil
 }
 
-func StopPHP() error {
-	cfg := config.Load()
-
-	if cfg.PHPMode != "builtin" {
-		// FPM mode: nothing to stop
-		return nil
-	}
-
-	// Built-in process kill
+func StopPHP(res *resolver.Resolver) error {
 	if phpCmd != nil {
 		err := phpCmd.Process.Kill()
 		phpCmd = nil
 		return err
 	}
 
-	// fallback kill
-	return exec.Command("pkill", "-f", "php -S").Run()
+	return exec.Command("pkill", "-f", res.PHPBinary()).Run()
 }

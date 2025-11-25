@@ -24,11 +24,30 @@ func Load() Config {
 	isWin := runtime.GOOS == "windows"
 
 	var root string
-	if isWin {
-		root = `C:/Evergon`
+
+	// 1. ENV override
+	if envRoot := os.Getenv("EVERGON_ROOT"); envRoot != "" {
+		root = envRoot
+	} else if cwd, err := os.Getwd(); err == nil {
+		// 2. go run mode (preferred for development)
+		dir := filepath.Dir(cwd)
+		if _, err := os.Stat(dir); err == nil {
+			root = dir
+		}
+	} else if exe, err := os.Executable(); err == nil {
+		// 3. binary mode (portable execution)
+		dir := filepath.Dir(filepath.Dir(filepath.Dir(exe)))
+		if _, err := os.Stat(dir); err == nil {
+			root = dir
+		}
 	} else {
-		cwd, _ := os.Getwd()
-		root = filepath.Dir(cwd)
+		// 4. full fallback
+		home, _ := os.UserHomeDir()
+		if isWin {
+			root = filepath.Join(home, "Evergon")
+		} else {
+			root = filepath.Join(home, "evergon")
+		}
 	}
 
 	phpVer := "81"
@@ -48,7 +67,7 @@ func Load() Config {
 		nginxConf = filepath.Join(nginxBase, "conf", "nginx.conf")
 		nginxVhosts = filepath.Join(nginxBase, "conf", "vhosts")
 	} else {
-		phpExec = "/usr/bin/php"
+		phpExec = filepath.Join(phpBase, "bin", "php")
 		nginxExec = filepath.Join(nginxBase, "portable", "sbin", "nginx")
 		nginxConf = filepath.Join(nginxBase, "portable", "conf", "nginx.conf")
 		nginxVhosts = filepath.Join(nginxBase, "portable", "conf", "vhosts")
