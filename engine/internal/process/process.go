@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"strconv"
 )
 
 // Start a process without waiting
@@ -35,4 +36,9 @@ func IsRunning(name string) bool {
 	cmd := exec.Command("pgrep", "-f", name)
 	err := cmd.Run()
 	return err == nil // exit code 0 = FOUND
+}
+func IsRunningPID(pid int) bool {
+	cmd := exec.Command("ps", "-p", strconv.Itoa(pid))
+	err := cmd.Run()
+	return err == nil
 }
