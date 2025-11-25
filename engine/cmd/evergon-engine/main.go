@@ -1,9 +1,10 @@
 package main
 
 import (
+	"log"
+
 	"evergon/engine/internal/api"
 	"evergon/engine/internal/config"
-	"log"
 )
 
 func main() {
