@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"evergon/engine/internal/manager"
 	"evergon/engine/internal/process"
@@ -101,4 +103,44 @@ func RegisterRoutes(mux *http.ServeMux, res *resolver.Resolver) {
 		list := scanner.Scan(res)
 		json.NewEncoder(w).Encode(list)
 	}))
+	mux.HandleFunc("/vhost/create", withCORS(func(w http.ResponseWriter, r *http.Request) {
+		project := r.URL.Query().Get("project")
+		if project == "" {
+			http.Error(w, "project required", 400)
+			return
+		}
+
+		root := filepath.Join(res.WorkspaceWWW(), project)
+		if _, err := os.Stat(root); os.IsNotExist(err) {
+			http.Error(w, "project not found", 404)
+			return
+		}
+
+		domain := project + ".local"
+		phpPort := "9000"
+
+		if err := manager.CreateVHost(domain, root, phpPort, res); err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+
+		manager.ReloadVHost()
+		w.Write([]byte(domain))
+	}))
+
+	mux.HandleFunc("/vhost/list", withCORS(func(w http.ResponseWriter, r *http.Request) {
+		list := manager.ListVHosts(res)
+		json.NewEncoder(w).Encode(list)
+	}))
+
+	mux.HandleFunc("/vhost/remove", withCORS(func(w http.ResponseWriter, r *http.Request) {
+		domain := r.URL.Query().Get("domain")
+		if domain == "" {
+			http.Error(w, "domain required", 400)
+			return
+		}
+		manager.RemoveVHost(domain, res)
+		w.Write([]byte("removed"))
+	}))
+
 }
