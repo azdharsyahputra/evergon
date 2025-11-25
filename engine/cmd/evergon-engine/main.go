@@ -16,6 +16,7 @@ import (
 func main() {
 	cfg := config.Load()
 	res := resolver.New(cfg)
+	res.EnsureDirs()
 	pidFile := res.EnginePIDFile()
 
 	log.Println("[Evergon Engine] Initializing...")

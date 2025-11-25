@@ -56,3 +56,18 @@ func (r *Resolver) SiteRoot(name string) string {
 func (r *Resolver) EnginePIDFile() string {
 	return filepath.Join(r.cfg.RootDir, "engine.pid")
 }
+func (r *Resolver) NginxVHostDir() string {
+	return r.cfg.NginxVHostDir
+}
+
+func (r *Resolver) WorkspaceWWW() string {
+	return filepath.Join(r.cfg.Workspace, "www")
+}
+
+func (r *Resolver) LogDir() string {
+	return filepath.Join(r.cfg.RootDir, "logs")
+}
+
+func (r *Resolver) PHPVersionDir() string {
+	return filepath.Join(r.cfg.RootDir, "php_versions")
+}
