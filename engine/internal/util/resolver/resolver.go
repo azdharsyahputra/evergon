@@ -53,3 +53,6 @@ func (r *Resolver) VHostFile(name string) string {
 func (r *Resolver) SiteRoot(name string) string {
 	return filepath.Join(r.cfg.Workspace, name)
 }
+func (r *Resolver) EnginePIDFile() string {
+	return filepath.Join(r.cfg.RootDir, "engine.pid")
+}

@@ -8,6 +8,7 @@ import (
 	"evergon/engine/internal/manager"
 	"evergon/engine/internal/process"
 	"evergon/engine/internal/scanner"
+	"evergon/engine/internal/util/pid"
 	"evergon/engine/internal/util/resolver"
 )
 
@@ -27,7 +28,11 @@ func withCORS(fn http.HandlerFunc) http.HandlerFunc {
 
 func RegisterRoutes(mux *http.ServeMux, res *resolver.Resolver) {
 	mux.HandleFunc("/health", withCORS(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, "OK")
+		if pid.Exists(res.EnginePIDFile()) {
+			fmt.Fprint(w, "running")
+		} else {
+			fmt.Fprint(w, "stopped")
+		}
 	}))
 
 	mux.HandleFunc("/php/status", withCORS(func(w http.ResponseWriter, r *http.Request) {
