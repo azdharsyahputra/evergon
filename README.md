@@ -1,103 +1,122 @@
-# Evergon (v0.1 – Foundation Release)
+# Evergon — Modern Local Dev Environment (v0.1 Foundation Release)
+![stars](https://img.shields.io/github/stars/azdharsyahputra/evergon?style=social)
+![watchers](https://img.shields.io/github/watchers/azdharsyahputra/evergon?style=social)
+![forks](https://img.shields.io/github/forks/azdharsyahputra/evergon?style=social)
+![license](https://img.shields.io/github/license/azdharsyahputra/evergon)
 
-Evergon is a modern, portable, and developer-centric local web environment — aiming to provide a clean and modular alternative to tools like Laragon.  
-**Version 0.1 marks the first foundation release**, where the core engine is built and the system architecture is established.
+Evergon is a **modular, portable, and developer-centric local web environment**, designed as a cleaner and more extensible alternative to tools like **Laragon**, **XAMPP**, and **MAMP** — but with a modern architecture built on **Go**, isolated runtimes, and service-level orchestration.
 
-This version focuses on engine-level infrastructure.  
-Future versions will include the full panel, PHP runtime integration, additional services, and installer tooling.
-
----
-
-## 🚧 Project Status — v0.1 (Early Foundation)
-
-This release contains:
-
-### ✔ Fully Implemented
-- Core Go Engine  
-- Internal API structure  
-- Process Manager (base)  
-- Nginx Manager (early implementation)  
-- Nginx Portable Runtime  
-- Configuration Loader  
-- Basic Project Scanner  
-
-### 🚧 In Progress
-- PHP Manager (runtime switching)  
-- Panel UI (React/Tailwind scaffolding only)  
-- Auto vhost generator  
-- Service lifecycle handling  
-- Engine-panel communication  
-
-### ❌ Not Implemented Yet (Coming Soon)
-- MySQL portable runtime  
-- PHP-FPM orchestration  
-- SSL support  
-- Full installer pipeline  
-- Add-on / plugin system  
-
-> **Evergon is not ready for production use.**  
-> This version is intended for architecture validation and local development experiments.
+This first foundation release establishes the **core engine**, runtime scaffolding, and architectural direction.  
+Future versions will introduce full UI control, runtime switching, portable services, and installer packaging.
 
 ---
 
-# 📐 Architecture Overview
+## Preview (Dashboard Sneak Peek)
 
-Save the image to:
+<p align="center">
+  <img src="docs/images/dashboard.png" width="920">
+</p>
 
-```
-docs/images/architecture.png
-```
+The upcoming panel provides:
 
-Then the README displays it here:
+- service monitoring  
+- PHP / Nginx controls  
+- project detection  
+- system analytics  
+- runtime switching (planned)
+
+---
+
+## Why Evergon Exists
+
+Traditional local dev stacks are:
+
+✖ monolithic  
+✖ hard to extend  
+✖ Windows-dependent  
+✖ locked to fixed runtimes  
+✖ not developer-first  
+
+Evergon is built to be:
+
+✅ portable  
+✅ modular  
+✅ cross-platform  
+✅ service-oriented  
+✅ developer-controlled  
+
+---
+
+# Project Status — v0.1 FOUNDATION
+
+### ✅ Implemented
+- Core Go Engine
+- Internal API surface
+- Base Process Manager
+- Early Nginx Manager
+- Portable Nginx Runtime
+- Config Loader
+- Basic Project Scanner
+
+### 🧩 In Development
+- PHP runtime switching manager
+- Control Panel (React + Tailwind)
+- Auto virtual host generator
+- Service lifecycle orchestration
+- Engine ↔ Panel communication layer
+
+### 🔜 Coming Soon
+- MySQL portable runtime
+- PHP-FPM orchestration
+- SSL support
+- Windows installer
+- Add-on / plugin ecosystem
+
+> **Evergon is not production-ready.**
+> v0.1 is intended for architecture validation and experimentation.
+
+---
+
+# Architecture
 
 <p align="center">
   <img src="docs/images/architecture.png" width="820">
 </p>
 
-The system flows horizontally:
+**Horizontal flow:**
 
-**Panel → Engine → Runtime (Nginx, PHP Versions, Projects)**  
-Engine acts as the central orchestrator.
+**Panel → Engine → Runtimes (Nginx / PHP / Projects)**  
+The Engine acts as the orchestration core.
 
 ---
 
-## 🧭 Project Structure
+## Project Structure
 
 ```
 evergon/
   engine/
     cmd/evergon-engine/
-    internal/
-      api/
-      process/
-      manager/
-      scanner/
-      config/
-      util/
+    internal/{api,process,manager,scanner,config,util}
     go.mod
 
   panel/
   admin/
   php_versions/
-  nginx/
-    build/
-    portable/
+  nginx/{build,portable}
   nginx_template/
   installer/
-  docs/
-    images/
+  docs/images/
   public/
   www/
-  README.md
 ```
 
 ---
 
-## 🚀 Getting Started (v0.1)
+# Getting Started (v0.1)
 
-### 1. Clone Repo
+### 1. Clone
 ```bash
-git clone https://github.com/yourusername/evergon.git
+git clone https://github.com/azdharsyahputra/evergon.git
 cd evergon
 ```
 
@@ -112,59 +131,57 @@ go build -o evergon-engine ./cmd/evergon-engine
 ./evergon-engine
 ```
 
-### 4. Panel (not yet functional)
-Panel UI structure exists but not wired to backend.
+### 4. Panel (placeholder)
+Scaffold exists — integration planned for v0.2+.
 
 ---
 
-## 🛠 Configuration
+# Roadmap
 
-Engine config is located here:
+## v0.2
+- PHP Manager (runtime switching)
+- Engine ↔ Panel communication
+- Auto-vhost generation
+- Service lifecycle control
+- Basic install script
 
-```
-engine/internal/config/config.go
-```
+## v0.3
+- PHP-FPM integration
+- MySQL portable runtime
+- SSL (self-signed)
+- Project presets (Laravel / CI4)
 
-Handles:
-- Runtime paths  
-- Nginx executable  
-- PHP version slots (future)  
-- Project scanning rules  
+## v0.4
+- Windows Installer (.exe)
+- Plugin system
+- Optional Caddy engine
 
----
-
-## 🗺 Roadmap (Next Versions)
-
-### v0.2
-- Full PHP Manager  
-- Panel ↔ Engine communication  
-- Automatic Vhost Generator  
-- Service lifecycle management  
-- Basic installation script
-
-### v0.3
-- PHP-FPM integration  
-- MySQL portable runtime  
-- Project templates (Laravel / CI4)  
-- SSL generation (self-signed)
-
-### v0.4
-- Windows installer (.exe)  
-- Plugin/add-on system  
-- Multi-engine option (Nginx/Caddy)
-
-### v1.0
-- Full stable release  
-- Complete control panel  
-- Production-ready workflows  
+## v1.0 Stable
+- Full control panel UI
+- Complete runtime ecosystem
+- Production-ready workflows
 
 ---
 
-## 📄 License  
+## Contributing
+Public contribution opens at **v0.3**  
+Feedback and discussion already welcome.
+
+---
+
+## Star & Watch
+If you want to follow development progress:
+
+⭐ **Star this repo**  
+👁 **Watch → Releases Only**
+
+---
+
+## License
 MIT License
 
 ---
 
-## ✍ Author  
-**Muhammad Azdhar Syahputra** — Creator & Lead Developer (Evergon)
-
+## Author
+**Muhammad Azdhar Syahputra**  
+Creator & Lead Developer — Evergon

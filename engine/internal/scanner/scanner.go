@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"evergon/engine/internal/config"
+	"evergon/engine/internal/util/resolver"
 )
 
 type Project struct {
@@ -13,7 +13,6 @@ type Project struct {
 	Type string `json:"type"`
 }
 
-// Detect project type
 func detectType(path string) string {
 	if fileExists(filepath.Join(path, "artisan")) {
 		return "laravel"
@@ -27,10 +26,8 @@ func detectType(path string) string {
 	return "unknown"
 }
 
-func Scan() []Project {
-	cfg := config.Load()
-	root := filepath.Join(cfg.Workspace, "www")
-
+func Scan(res *resolver.Resolver) []Project {
+	root := filepath.Join(res.Workspace(), "www")
 	result := []Project{}
 
 	entries, err := os.ReadDir(root)

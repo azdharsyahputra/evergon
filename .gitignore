@@ -63,6 +63,7 @@ vendor/
 /php_versions/php-*/*
 /php_versions/php-*/*.exe
 /php_versions/php-*/*.dll
+/php_versions/php81
 
 # But keep folder root
 !/php_versions/
