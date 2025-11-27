@@ -1,9 +1,10 @@
 import { NavLink } from "react-router-dom";
-import { Home, ServerCog, Code, Settings } from "lucide-react";
+import { Home, ServerCog, Code, Settings, FolderDot } from "lucide-react";
 
 const nav = [
   { name: "Dashboard", to: "/", icon: Home },
   { name: "Services", to: "/services", icon: ServerCog },
+  { name: "Projects", to: "/projects", icon: FolderDot },
   { name: "PHP Versions", to: "/php", icon: Code },
   { name: "Settings", to: "/settings", icon: Settings },
 ];

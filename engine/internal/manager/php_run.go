@@ -2,13 +2,35 @@ package manager
 
 import (
 	"fmt"
+	"net"
+	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
+	"syscall"
 
 	"evergon/engine/internal/config"
 )
 
 var phpProcesses = map[string]*exec.Cmd{}
+
+func findFreePort() (string, error) {
+	l, err := net.Listen("tcp", ":0")
+	if err != nil {
+		return "", err
+	}
+	defer l.Close()
+	return strconv.Itoa(l.Addr().(*net.TCPAddr).Port), nil
+}
+
+func isPortInUse(port string) bool {
+	conn, err := net.Listen("tcp", ":"+port)
+	if err != nil {
+		return true
+	}
+	conn.Close()
+	return false
+}
 
 func StartProjectPHP(projectName string) (string, error) {
 	cfg := config.Load()
@@ -25,8 +47,16 @@ func StartProjectPHP(projectName string) (string, error) {
 	}
 
 	if pcfg.PHPPort == "" {
-		pcfg.PHPPort = GeneratePort()
+		port, err := findFreePort()
+		if err != nil {
+			return "", err
+		}
+		pcfg.PHPPort = port
 		SaveProjectConfig(projectName, pcfg)
+	} else {
+		if isPortInUse(pcfg.PHPPort) {
+			return "", fmt.Errorf("port %s already in use", pcfg.PHPPort)
+		}
 	}
 
 	var phpExec string
@@ -46,23 +76,57 @@ func StartProjectPHP(projectName string) (string, error) {
 	}
 
 	cmd := exec.Command(phpExec, "-S", "127.0.0.1:"+pcfg.PHPPort, "-t", projectPath)
+
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		Setpgid: true,
+	}
+
 	cmd.Stdout = nil
 	cmd.Stderr = nil
 
-	err := cmd.Start()
-	if err != nil {
+	if err := cmd.Start(); err != nil {
 		return "", fmt.Errorf("failed to start PHP: %v", err)
 	}
 
 	phpProcesses[projectName] = cmd
+
+	pidPath := filepath.Join(projectPath, ".evergon.pid")
+	os.WriteFile(pidPath, []byte(strconv.Itoa(cmd.Process.Pid)), 0644)
+
 	return pcfg.PHPPort, nil
 }
 
 func StopProjectPHP(projectName string) error {
+	cfg := config.Load()
+	projectPath := filepath.Join(cfg.Workspace, "www", projectName)
+	pidPath := filepath.Join(projectPath, ".evergon.pid")
+
 	if cmd, ok := phpProcesses[projectName]; ok {
 		err := cmd.Process.Kill()
 		delete(phpProcesses, projectName)
+		os.Remove(pidPath)
 		return err
 	}
+
+	raw, err := os.ReadFile(pidPath)
+	if err == nil {
+		pid, _ := strconv.Atoi(string(raw))
+		process, err := os.FindProcess(pid)
+		if err == nil {
+			process.Kill()
+		}
+		os.Remove(pidPath)
+	}
+
 	return nil
+}
+
+func IsProjectRunning(projectName string) bool {
+	_, ok := phpProcesses[projectName]
+	return ok
+}
+
+func RestartProjectPHP(projectName string) (string, error) {
+	StopProjectPHP(projectName)
+	return StartProjectPHP(projectName)
 }

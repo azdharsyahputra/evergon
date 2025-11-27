@@ -13,22 +13,18 @@ import (
 func phpBlockFor(projectName string) string {
 	cfg, _ := LoadProjectConfig(projectName)
 
-	if cfg.PHPPort != "" {
-		return `
-    location ~ \.php$ {
-        include fastcgi_params;
-        fastcgi_pass 127.0.0.1:` + cfg.PHPPort + `;
-        fastcgi_index index.php;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-    }`
+	port := cfg.PHPPort
+	if port == "" {
+		port = "9000"
 	}
 
 	return `
-    location ~ \.php$ {
-        include fastcgi_params;
-        fastcgi_pass 127.0.0.1:9000;
-        fastcgi_index index.php;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    location / {
+        proxy_pass http://127.0.0.1:` + port + `;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }`
 }
 

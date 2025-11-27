@@ -79,6 +79,30 @@ export default function Dashboard() {
     return () => clearInterval(timer);
   }, []);
 
+  const [phpVersions, setPhpVersions] = useState<{version: string}[]>([]);
+  const [currentPhpVersion, setCurrentPhpVersion] = useState<string>("");
+
+  useEffect(() => {
+    async function loadPhpVersions() {
+      const res = await fetch("http://127.0.0.1:9090/php/version/list");
+      const versions = await res.json();
+      setPhpVersions(versions);
+
+      const cur = await fetch("http://127.0.0.1:9090/php/version/current");
+      const curJson = await cur.json();
+      setCurrentPhpVersion(curJson.php_version);
+    }
+
+    loadPhpVersions();
+  }, []);
+
+  async function changePhpVersion(version: string) {
+    await fetch(`http://127.0.0.1:9090/php/version/set?version=${version}`, {
+      method: "POST",
+    });
+    setCurrentPhpVersion(version);
+  }
+
   return (
     <div className="space-y-12">
 
@@ -112,12 +136,50 @@ export default function Dashboard() {
       {/* SERVICE CARDS */}
       <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
 
-        <StatCard
-          title="Engine Status"
-          value="Running"
-          icon={<Activity size={26} />}
-          status="running"
-        />
+      <StatCard
+        title="PHP Version"
+        value={`PHP ${currentPhpVersion}`}
+        icon={<Code2 size={26} className="text-indigo-600" />}
+        actions={
+          <div className="w-full">
+            <label className="block text-xs font-medium text-gray-500 mb-1">
+              Select Version
+            </label>
+
+            <div className="relative">
+              <select
+                value={currentPhpVersion}
+                onChange={(e) => changePhpVersion(e.target.value)}
+                className="
+                  w-full appearance-none
+                  rounded-xl border border-gray-300
+                  bg-white px-3 py-2 pr-10
+                  text-sm font-medium text-gray-800
+                  shadow-sm
+                  focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
+                  hover:border-gray-400
+                  transition
+                "
+              >
+                {phpVersions.map((v) => (
+                  <option key={v.version} value={v.version}>
+                    PHP {v.version}
+                  </option>
+                ))}
+              </select>
+
+              <span
+                className="
+                  pointer-events-none absolute inset-y-0 right-3
+                  flex items-center text-gray-500
+                "
+              >
+                ▼
+              </span>
+            </div>
+          </div>
+        }
+      />
 
         {/* PHP STATUS */}
         <StatCard
