@@ -77,3 +77,24 @@ func (r *Resolver) NginxExecutable() string {
 func (r *Resolver) ProjectRoot(projectName string) string {
 	return filepath.Join(r.cfg.Workspace, "www", projectName)
 }
+
+func (r *Resolver) GlobalPHPConfigFile() string {
+	return filepath.Join(r.cfg.RootDir, "php.global.json")
+}
+
+func (r *Resolver) ActivePHPVersion() string {
+	// default fallback — real loading happens in manager
+	return r.cfg.PHPVersion
+}
+
+func (r *Resolver) PHPBinaryFor(version string) string {
+	return filepath.Join(r.PHPVersionDir(), "php"+version, "bin", "php")
+}
+
+func (r *Resolver) ActivePHPBinary() string {
+	return r.PHPBinaryFor(r.ActivePHPVersion())
+}
+
+func (r *Resolver) ActivePHPBinaryName() string {
+	return "php" + r.ActivePHPVersion()
+}
