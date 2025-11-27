@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Play, Square, Globe, Settings } from "lucide-react";
 
 interface ProjectCardProps {
@@ -6,10 +7,10 @@ interface ProjectCardProps {
   phpPort: string;
   status: "running" | "stopped";
   logo: string;
-  onStart: () => void | Promise<void>;
-  onStop: () => void | Promise<void>;
+  onStart: () => Promise<void>;
+  onStop: () => Promise<void>;
   onOpen: () => void;
-  onConfigure: () => void | Promise<void>;
+  onConfigure: () => void;
 }
 
 export default function ProjectCard({
@@ -24,12 +25,26 @@ export default function ProjectCard({
   onConfigure
 }: ProjectCardProps) {
 
+  const [busy, setBusy] = useState(false);
   const isRunning = status === "running";
+
+  async function handleStart() {
+    if (busy || isRunning) return;
+    setBusy(true);
+    await onStart();
+    setBusy(false);
+  }
+
+  async function handleStop() {
+    if (busy || !isRunning) return;
+    setBusy(true);
+    await onStop();
+    setBusy(false);
+  }
 
   return (
     <div className="bg-white/90 backdrop-blur-xl border rounded-2xl shadow-sm hover:shadow-xl transition p-6 relative overflow-hidden">
 
-      {/* Accent Bar */}
       <div
         className={`absolute top-0 left-0 w-1 h-full ${
           isRunning
@@ -38,7 +53,6 @@ export default function ProjectCard({
         }`}
       />
 
-      {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 rounded-xl bg-gray-50 overflow-hidden shadow flex items-center justify-center">
@@ -62,28 +76,39 @@ export default function ProjectCard({
         </span>
       </div>
 
-      {/* Divider */}
       <div className="border-t my-5" />
 
-      {/* Buttons */}
       <div className="flex items-center gap-3">
-        {isRunning ? (
-          <button
-            onClick={onStop}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg flex items-center gap-2 hover:bg-red-700 transition"
-          >
-            <Square size={18} />
-            Stop
-          </button>
-        ) : (
-          <button
-            onClick={onStart}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg flex items-center gap-2 hover:bg-green-700 transition"
-          >
-            <Play size={18} />
-            Start
-          </button>
-        )}
+
+        <button
+          onClick={handleStart}
+          disabled={busy || isRunning}
+          className={`px-4 py-2 rounded-lg flex items-center gap-2 transition
+            ${
+              busy || isRunning
+                ? "bg-green-300 text-white cursor-not-allowed"
+                : "bg-green-600 text-white hover:bg-green-700"
+            }
+          `}
+        >
+          <Play size={18} />
+          Start
+        </button>
+
+        <button
+          onClick={handleStop}
+          disabled={busy || !isRunning}
+          className={`px-4 py-2 rounded-lg flex items-center gap-2 transition
+            ${
+              busy || !isRunning
+                ? "bg-red-300 text-white cursor-not-allowed"
+                : "bg-red-600 text-white hover:bg-red-700"
+            }
+          `}
+        >
+          <Square size={18} />
+          Stop
+        </button>
 
         <button
           onClick={onOpen}

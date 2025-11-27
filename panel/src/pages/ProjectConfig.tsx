@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { ArrowLeft, ServerCog, Plug } from "lucide-react";
+import { ArrowLeft, ServerCog, Plug, AlertTriangle } from "lucide-react";
 
 interface ProjectConfigData {
   php_version: string;
@@ -54,9 +54,19 @@ export default function ProjectConfig() {
     if (!name) return;
     setSaving(true);
 
+    const running = await fetch(
+      `http://127.0.0.1:9090/php/project/status?project=${name}`
+    ).then((r) => r.json());
+
+    if (running.running) {
+      await fetch(`http://127.0.0.1:9090/php/project/stop?project=${name}`);
+    }
+
     await fetch(
       `http://127.0.0.1:9090/php/project/set?project=${name}&version=${config.php_version}&port=${config.php_port}`
     );
+
+    await fetch(`http://127.0.0.1:9090/php/project/start?project=${name}`);
 
     setSaving(false);
   }
@@ -69,15 +79,15 @@ export default function ProjectConfig() {
     );
   }
 
+  const isReservedPort = config.php_port === "9090";
+
   return (
     <div className="space-y-10 p-10">
 
-      {/* Header Section */}
+      {/* Header */}
       <section className="bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-2xl p-8 text-white shadow-lg flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-extrabold tracking-tight">
-            {name}
-          </h1>
+          <h1 className="text-4xl font-extrabold tracking-tight">{name}</h1>
           <p className="text-indigo-100 text-lg mt-2">
             Project configuration & runtime settings
           </p>
@@ -92,8 +102,9 @@ export default function ProjectConfig() {
         </Link>
       </section>
 
-      {/* Editable Config */}
+      {/* Config Card */}
       <section className="bg-white/90 backdrop-blur-xl border rounded-2xl shadow p-8 space-y-6">
+
         <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
           <ServerCog size={22} className="text-indigo-600" />
           Runtime Configuration
@@ -101,7 +112,7 @@ export default function ProjectConfig() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-          {/* PHP Version Dropdown */}
+          {/* PHP Version */}
           <div>
             <label className="text-gray-600 text-sm">PHP Version</label>
             <select
@@ -112,7 +123,7 @@ export default function ProjectConfig() {
               className="w-full mt-1 border rounded-lg p-3 bg-gray-50 text-gray-800"
             >
               <option value="">Select Version</option>
-              {phpVersions.map(v => (
+              {phpVersions.map((v) => (
                 <option key={v.version} value={v.version}>
                   {v.version}
                 </option>
@@ -120,29 +131,45 @@ export default function ProjectConfig() {
             </select>
           </div>
 
-          {/* Port Input */}
+          {/* Port Input + Warning */}
           <div>
             <label className="text-gray-600 text-sm">Assigned Port</label>
             <div className="flex items-center gap-2 mt-1">
               <input
                 type="text"
                 value={config.php_port}
-                onChange={(e) =>
-                  setConfig({ ...config, php_port: e.target.value })
-                }
-                className="w-full border rounded-lg p-3 bg-gray-50 text-gray-800"
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === "9090") return;
+                  setConfig({ ...config, php_port: val });
+                }}
+                className={`w-full border rounded-lg p-3 bg-gray-50 text-gray-800 ${
+                  isReservedPort ? "border-red-500 bg-red-50" : ""
+                }`}
               />
               <Plug size={18} className="text-indigo-600" />
             </div>
+
+            {isReservedPort && (
+              <div className="flex items-center gap-2 mt-2 text-red-600 text-sm">
+                <AlertTriangle size={16} />
+                <span>Port 9090 is reserved by Evergon Engine.</span>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Save Button */}
         <button
           onClick={saveConfig}
-          disabled={saving}
-          className={`px-6 py-3 rounded-lg text-white font-semibold transition 
-            ${saving ? "bg-gray-400" : "bg-indigo-600 hover:bg-indigo-700"}`}
+          disabled={saving || isReservedPort}
+          className={`px-6 py-3 rounded-lg text-white font-semibold transition w-full md:w-auto
+            ${
+              saving || isReservedPort
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-indigo-600 hover:bg-indigo-700"
+            }
+          `}
         >
           {saving ? "Saving..." : "Save Changes"}
         </button>

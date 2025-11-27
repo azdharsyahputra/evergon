@@ -98,3 +98,6 @@ func (r *Resolver) ActivePHPBinary() string {
 func (r *Resolver) ActivePHPBinaryName() string {
 	return "php" + r.ActivePHPVersion()
 }
+func (r *Resolver) WorkspacePublic() string {
+	return filepath.Join(r.cfg.Workspace, "public")
+}
