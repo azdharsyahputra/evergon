@@ -60,7 +60,7 @@ func RegisterRoutes(mux *http.ServeMux, res *resolver.Resolver) {
 			return
 		}
 
-		if err := manager.StartPHP(root, res); err != nil {
+		if err := manager.StartPHP(res.WorkspaceWWW(), 9000, res); err != nil {
 			http.Error(w, err.Error(), 500)
 			return
 		}
@@ -182,11 +182,35 @@ func RegisterRoutes(mux *http.ServeMux, res *resolver.Resolver) {
 	mux.HandleFunc("/php/project/set", withCORS(func(w http.ResponseWriter, r *http.Request) {
 		project := r.URL.Query().Get("project")
 		version := r.URL.Query().Get("version")
+		port := r.URL.Query().Get("port")
+
+		if project == "" {
+			http.Error(w, "project required", 400)
+			return
+		}
 
 		cfg, _ := manager.LoadProjectConfig(project)
-		cfg.PHPVersion = version
+
+		// update values
+		if version != "" {
+			cfg.PHPVersion = version
+		}
+
+		if port != "" {
+			cfg.PHPPort = port
+		}
+
+		running := manager.IsProjectRunning(project)
+
+		if running {
+			manager.StopProjectPHP(project)
+		}
 
 		manager.SaveProjectConfig(project, cfg)
+
+		if running {
+			manager.StartProjectPHP(project)
+		}
 
 		w.Write([]byte("ok"))
 	}))
@@ -198,7 +222,13 @@ func RegisterRoutes(mux *http.ServeMux, res *resolver.Resolver) {
 			http.Error(w, err.Error(), 500)
 			return
 		}
-		w.Write([]byte(port))
+
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"status":  "running",
+			"project": project,
+			"port":    port,
+			"url":     "http://127.0.0.1:" + port,
+		})
 	}))
 
 	mux.HandleFunc("/php/project/stop", withCORS(func(w http.ResponseWriter, r *http.Request) {
@@ -211,4 +241,86 @@ func RegisterRoutes(mux *http.ServeMux, res *resolver.Resolver) {
 		w.Write([]byte("stopped"))
 	}))
 
+	mux.HandleFunc("/php/project/status", withCORS(func(w http.ResponseWriter, r *http.Request) {
+		project := r.URL.Query().Get("project")
+
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"project": project,
+			"running": manager.IsProjectRunning(project),
+		})
+	}))
+
+	mux.HandleFunc("/php/project/restart", withCORS(func(w http.ResponseWriter, r *http.Request) {
+		project := r.URL.Query().Get("project")
+
+		port, err := manager.RestartProjectPHP(project)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"status":  "running",
+			"project": project,
+			"port":    port,
+		})
+	}))
+
+	mux.HandleFunc("/port/check", withCORS(func(w http.ResponseWriter, r *http.Request) {
+		port := r.URL.Query().Get("port")
+		if port == "" {
+			http.Error(w, "port required", 400)
+			return
+		}
+
+		available := manager.IsPortAvailable(port)
+
+		json.NewEncoder(w).Encode(map[string]bool{
+			"available": available,
+		})
+	}))
+
+	mux.HandleFunc("/port/suggest", withCORS(func(w http.ResponseWriter, r *http.Request) {
+		port := manager.FindAvailablePort()
+
+		json.NewEncoder(w).Encode(map[string]string{
+			"port": port,
+		})
+	}))
+
+	mux.HandleFunc("/php/version/current", withCORS(func(w http.ResponseWriter, r *http.Request) {
+		cfg, _ := manager.LoadGlobalPHPConfig()
+		json.NewEncoder(w).Encode(cfg)
+	}))
+
+	// GET available PHP versions
+	mux.HandleFunc("/php/version/list", withCORS(func(w http.ResponseWriter, r *http.Request) {
+		versions := manager.DetectPHPVersions()
+		json.NewEncoder(w).Encode(versions)
+	}))
+
+	// SET global PHP version (auto restart if needed)
+	mux.HandleFunc("/php/version/set", withCORS(func(w http.ResponseWriter, r *http.Request) {
+		version := r.URL.Query().Get("version")
+		if version == "" {
+			http.Error(w, "version required", 400)
+			return
+		}
+
+		running := manager.IsPHPRunning(res)
+		if running {
+			manager.StopPHP(res)
+		}
+
+		manager.SaveGlobalPHPConfig(manager.GlobalPHPConfig{
+			PHPVersion: version,
+		})
+
+		if running {
+			// restart using workspace root and default port
+			manager.StartPHP(res.WorkspaceWWW(), 9000, res)
+		}
+
+		w.Write([]byte("ok"))
+	}))
 }
