@@ -33,13 +33,12 @@ const startNginx = () => callAPI("/nginx/start");
 const stopNginx = () => callAPI("/nginx/stop");
 const reloadNginx = () => callAPI("/nginx/reload");
 
-// PHP
-const startPHP = (root: string) =>
-  callAPI(`/php/start?root=${encodeURIComponent(root)}`);
-const stopPHP = () => callAPI("/php/stop");
+// GLOBAL PHP
+const startGlobalPHP = () => callAPI("/php/global/start");
+const stopGlobalPHP = () => callAPI("/php/global/stop");
+const fetchGlobalPHPStatus = () =>
+  fetch("http://127.0.0.1:9090/php/global/status").then((r) => r.json());
 
-// STATUS
-const fetchPhpStatus = () => getStatus("/php/status");
 const fetchNginxStatus = () => getStatus("/nginx/status");
 
 /* =====================================================
@@ -61,10 +60,10 @@ export default function Dashboard() {
   useEffect(() => {
     async function loadStatus() {
       try {
-        const php = await fetchPhpStatus();
+        const php = await fetchGlobalPHPStatus();
         const ngx = await fetchNginxStatus();
 
-        setPhpStatus(php.includes("running") ? "running" : "stopped");
+        setPhpStatus(php.running ? "running" : "stopped");
         setNginxStatus(ngx.includes("running") ? "running" : "stopped");
       } catch (err) {
         console.error("status error:", err);
@@ -183,7 +182,7 @@ export default function Dashboard() {
 
         {/* PHP STATUS */}
         <StatCard
-          title="PHP-FPM"
+          title="PHP Status"
           value={phpStatus === "running" ? "Running" : "Stopped"}
           icon={<Code2 size={26} />}
           status={phpStatus}
@@ -194,7 +193,7 @@ export default function Dashboard() {
                   onClick={async () => {
                     setLoadingPHP(true);
                     try {
-                      await stopPHP();
+                      await stopGlobalPHP();
                       setPhpStatus("stopped");
                     } finally {
                       setLoadingPHP(false);
@@ -210,7 +209,7 @@ export default function Dashboard() {
                   onClick={async () => {
                     setLoadingPHP(true);
                     try {
-                      await startPHP("/home/azdhar/evergon/www");
+                      await startGlobalPHP();
                       setPhpStatus("running");
                     } finally {
                       setLoadingPHP(false);

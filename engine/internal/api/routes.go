@@ -29,6 +29,9 @@ func withCORS(fn http.HandlerFunc) http.HandlerFunc {
 }
 
 func RegisterRoutes(mux *http.ServeMux, res *resolver.Resolver) {
+
+	RegisterSSE(mux, res)
+
 	mux.HandleFunc("/health", withCORS(func(w http.ResponseWriter, r *http.Request) {
 		if pid.Exists(res.EnginePIDFile()) {
 			fmt.Fprint(w, "running")
@@ -191,7 +194,8 @@ func RegisterRoutes(mux *http.ServeMux, res *resolver.Resolver) {
 
 		cfg, _ := manager.LoadProjectConfig(project)
 
-		// update values
+		oldPort := cfg.PHPPort
+
 		if version != "" {
 			cfg.PHPVersion = version
 		}
@@ -200,7 +204,7 @@ func RegisterRoutes(mux *http.ServeMux, res *resolver.Resolver) {
 			cfg.PHPPort = port
 		}
 
-		running := manager.IsProjectRunning(project)
+		running := manager.IsProjectActuallyRunning(project)
 
 		if running {
 			manager.StopProjectPHP(project)
@@ -208,7 +212,8 @@ func RegisterRoutes(mux *http.ServeMux, res *resolver.Resolver) {
 
 		manager.SaveProjectConfig(project, cfg)
 
-		if running {
+		// only restart if port or version changed
+		if running && (oldPort != cfg.PHPPort || version != "") {
 			manager.StartProjectPHP(project)
 		}
 
@@ -289,17 +294,15 @@ func RegisterRoutes(mux *http.ServeMux, res *resolver.Resolver) {
 	}))
 
 	mux.HandleFunc("/php/version/current", withCORS(func(w http.ResponseWriter, r *http.Request) {
-		cfg, _ := manager.LoadGlobalPHPConfig()
-		json.NewEncoder(w).Encode(cfg)
+		cfgGlobal, _ := manager.LoadGlobalPHPConfig(res)
+		json.NewEncoder(w).Encode(cfgGlobal)
 	}))
 
-	// GET available PHP versions
 	mux.HandleFunc("/php/version/list", withCORS(func(w http.ResponseWriter, r *http.Request) {
-		versions := manager.DetectPHPVersions()
-		json.NewEncoder(w).Encode(versions)
+		list := manager.DetectPHPVersions()
+		json.NewEncoder(w).Encode(list)
 	}))
 
-	// SET global PHP version (auto restart if needed)
 	mux.HandleFunc("/php/version/set", withCORS(func(w http.ResponseWriter, r *http.Request) {
 		version := r.URL.Query().Get("version")
 		if version == "" {
@@ -307,20 +310,83 @@ func RegisterRoutes(mux *http.ServeMux, res *resolver.Resolver) {
 			return
 		}
 
-		running := manager.IsPHPRunning(res)
-		if running {
-			manager.StopPHP(res)
+		// validate exist
+		valid := false
+		for _, v := range manager.DetectPHPVersions() {
+			if v.Version == version {
+				valid = true
+				break
+			}
+		}
+		if !valid {
+			http.Error(w, "php version not installed", 400)
+			return
 		}
 
-		manager.SaveGlobalPHPConfig(manager.GlobalPHPConfig{
-			PHPVersion: version,
-		})
+		cfgGlobal, _ := manager.LoadGlobalPHPConfig(res)
+		cfgGlobal.PHPVersion = version
 
-		if running {
-			// restart using workspace root and default port
-			manager.StartPHP(res.WorkspaceWWW(), 9000, res)
+		// fallback default port kalau belum ada di config
+		if cfgGlobal.PHPPort == 0 {
+			cfgGlobal.PHPPort = 8000
 		}
 
-		w.Write([]byte("ok"))
+		manager.SaveGlobalPHPConfig(res, cfgGlobal)
+
+		// restart kalau running
+		if manager.IsGlobalPHPRunning() {
+			manager.StopGlobalPHP(res)
+			manager.StartGlobalPHP(
+				res.WorkspacePublic(),
+				cfgGlobal.PHPPort,
+				cfgGlobal.PHPVersion,
+				res,
+			)
+		}
+
+		fmt.Fprint(w, "ok")
 	}))
+
+	mux.HandleFunc("/php/global/start", withCORS(func(w http.ResponseWriter, r *http.Request) {
+		cfgGlobal, _ := manager.LoadGlobalPHPConfig(res)
+
+		// default port kalau config lama
+		if cfgGlobal.PHPPort == 0 {
+			cfgGlobal.PHPPort = 8000
+		}
+
+		err := manager.StartGlobalPHP(
+			res.WorkspacePublic(),
+			cfgGlobal.PHPPort,
+			cfgGlobal.PHPVersion,
+			res,
+		)
+
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+
+		fmt.Fprint(w, "started")
+	}))
+	// STOP global PHP server
+	mux.HandleFunc("/php/global/stop", withCORS(func(w http.ResponseWriter, r *http.Request) {
+		manager.StopGlobalPHP(res)
+		fmt.Fprint(w, "stopped")
+	}))
+
+	mux.HandleFunc("/php/global/status", withCORS(func(w http.ResponseWriter, r *http.Request) {
+		cfgGlobal, _ := manager.LoadGlobalPHPConfig(res)
+
+		if cfgGlobal.PHPPort == 0 {
+			cfgGlobal.PHPPort = 8000
+		}
+
+		json.NewEncoder(w).Encode(map[string]any{
+			"running": manager.IsGlobalPHPRunning(),
+			"port":    cfgGlobal.PHPPort,
+			"version": cfgGlobal.PHPVersion,
+		})
+	}))
+
 }

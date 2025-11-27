@@ -32,6 +32,12 @@ func isPortInUse(port string) bool {
 	return false
 }
 
+func clearStaleProcess(projectName string, port string) {
+	if !isPortInUse(port) {
+		delete(phpProcesses, projectName)
+	}
+}
+
 func StartProjectPHP(projectName string) (string, error) {
 	cfg := config.Load()
 	projectPath := filepath.Join(cfg.Workspace, "www", projectName)
@@ -55,7 +61,10 @@ func StartProjectPHP(projectName string) (string, error) {
 		SaveProjectConfig(projectName, pcfg)
 	} else {
 		if isPortInUse(pcfg.PHPPort) {
-			return "", fmt.Errorf("port %s already in use", pcfg.PHPPort)
+			clearStaleProcess(projectName, pcfg.PHPPort)
+			if isPortInUse(pcfg.PHPPort) {
+				return "", fmt.Errorf("port %s already in use", pcfg.PHPPort)
+			}
 		}
 	}
 
@@ -71,16 +80,15 @@ func StartProjectPHP(projectName string) (string, error) {
 		return "", fmt.Errorf("PHP version %s not found", pcfg.PHPVersion)
 	}
 
-	if _, ok := phpProcesses[projectName]; ok {
-		return pcfg.PHPPort, nil
+	if cmd, ok := phpProcesses[projectName]; ok {
+		if cmd.ProcessState == nil {
+			return pcfg.PHPPort, nil
+		}
+		delete(phpProcesses, projectName)
 	}
 
 	cmd := exec.Command(phpExec, "-S", "127.0.0.1:"+pcfg.PHPPort, "-t", projectPath)
-
-	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Setpgid: true,
-	}
-
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	cmd.Stdout = nil
 	cmd.Stderr = nil
 
@@ -102,10 +110,10 @@ func StopProjectPHP(projectName string) error {
 	pidPath := filepath.Join(projectPath, ".evergon.pid")
 
 	if cmd, ok := phpProcesses[projectName]; ok {
-		err := cmd.Process.Kill()
+		cmd.Process.Kill()
 		delete(phpProcesses, projectName)
 		os.Remove(pidPath)
-		return err
+		return nil
 	}
 
 	raw, err := os.ReadFile(pidPath)
@@ -122,11 +130,44 @@ func StopProjectPHP(projectName string) error {
 }
 
 func IsProjectRunning(projectName string) bool {
-	_, ok := phpProcesses[projectName]
-	return ok
+	cfg := config.Load()
+	projectPath := filepath.Join(cfg.Workspace, "www", projectName)
+	pidPath := filepath.Join(projectPath, ".evergon.pid")
+
+	raw, err := os.ReadFile(pidPath)
+	if err != nil {
+		return false
+	}
+
+	pid, _ := strconv.Atoi(string(raw))
+	process, err := os.FindProcess(pid)
+	if err != nil {
+		return false
+	}
+
+	err = process.Signal(syscall.Signal(0))
+	if err != nil {
+		return false
+	}
+
+	pcfg, _ := LoadProjectConfig(projectName)
+	return isPortInUse(pcfg.PHPPort)
 }
 
 func RestartProjectPHP(projectName string) (string, error) {
 	StopProjectPHP(projectName)
 	return StartProjectPHP(projectName)
+}
+func IsProjectActuallyRunning(project string) bool {
+	cfg, _ := LoadProjectConfig(project)
+	if cfg.PHPPort == "" {
+		return false
+	}
+
+	conn, err := net.Listen("tcp", ":"+cfg.PHPPort)
+	if err != nil {
+		return true // port really in use
+	}
+	conn.Close()
+	return false
 }
