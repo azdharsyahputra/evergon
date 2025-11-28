@@ -1,4 +1,4 @@
-# Evergon — Modern Local Dev Environment (v0.1 Foundation Release)
+# Evergon — Modern Local Dev Environment (v0.1 Linux Beta Test)
 ![stars](https://img.shields.io/github/stars/azdharsyahputra/evergon?style=social)
 ![watchers](https://img.shields.io/github/watchers/azdharsyahputra/evergon?style=social)
 ![forks](https://img.shields.io/github/forks/azdharsyahputra/evergon?style=social)
